@@ -16,12 +16,12 @@ import java.util.Stack;
  */
 public class GridSolver {
     Chain currentChain;
-    ArrayList<Chain> chainList;
+    HashSet<Stack<Integer>> chainList;
     RandomGrid gameBoard;
     
     public GridSolver(RandomGrid gameBoard){
         currentChain = new Chain();
-        chainList = new ArrayList<>();
+        chainList = new HashSet<>();
         this.gameBoard = gameBoard;
     }
     
@@ -38,12 +38,14 @@ public class GridSolver {
                 }
             }
         }
-                
+        
+        for(Stack<Integer> x : chainList){
+            System.out.println("Chain: " + x);
+        }       
     }
     
     public  boolean isChain(int row, int column, int[][] gameBoard){
         if(row < 0 || column < 0 || row >= gameBoard.length || column >= gameBoard.length || currentChain.getVisited()[row][column]){
-//            System.out.println("Current row and column: " + row + " " + column + " caught at first if statement" + + currentChain.getSum());
             return false;
         }
         
@@ -52,14 +54,24 @@ public class GridSolver {
         
         
         if(currentChain.getSum() == target && currentChain.getNumbers().size() >= gameBoard.length-1){
-//            System.out.println("Current row and column: " + row + " " + column + " caught at second if statement");
-            System.out.println("One chain is: " + currentChain.getNumbers());
+            chainList.add(currentChain.getNumbers());
+            currentChain.getVisited()[row][column] = true;
+                        
             return true;
         }
         else if(currentChain.getSum() < target){
-//            System.out.println("Current row and column: " + row + " " + column + " caught at third if statement " + currentChain.getSum());
             currentChain.getVisited()[row][column] = true;
-            isChain(row-1, column-1, gameBoard);
+            recursive(row,column,gameBoard);
+        }
+        else if(currentChain.getSum() > target){
+            currentChain.setSum(currentChain.getSum() - currentChain.getNumbers().pop());
+        }
+        
+        return false;        
+    }
+    
+    public void recursive(int row, int column, int[][] gameBoard){
+        isChain(row-1, column-1, gameBoard);
             isChain(row-1, column, gameBoard);
             isChain(row-1, column+1, gameBoard);
             isChain(row, column-1, gameBoard);
@@ -68,14 +80,7 @@ public class GridSolver {
             isChain(row+1, column-1, gameBoard);
             isChain(row+1, column, gameBoard);
             isChain(row+1, column+1, gameBoard);
-        }
-        else if(currentChain.getSum() > target){
-//            System.out.println("Popped: " + currentChain.getNumbers().peek());
-            currentChain.setSum(currentChain.getSum() - currentChain.getNumbers().pop());
-//            System.out.println("Current row and column: " + row + " " + column + " caught at last else statement " + currentChain.getSum());
-        }
         
-        return false;        
     }
     
 }
